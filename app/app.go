@@ -11,13 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// ----------------- App -----------------
 
 type App struct {
 	Model models.Models
 }
 
-// ----------------- NewApp -----------------
 
 func NewApp() *App {
 	client, err := connectToMongoDB()
@@ -35,7 +33,6 @@ func NewApp() *App {
 	}
 }
 
-// ----------------- Document Handlers -----------------
 
 func (a *App) InsertDocumentHandler(w http.ResponseWriter, r *http.Request) {
 	var doc models.Document
@@ -110,8 +107,6 @@ func (app *App) RetrieveDocumentHandler(w http.ResponseWriter, r *http.Request) 
 	WriteJson(w, http.StatusOK, jsonDoc)
 }
 
-
-// ----------------- Institute Handlers -----------------
 
 func (app *App) InsertInstituteHandler(w http.ResponseWriter, r *http.Request) {
 	var inst models.Institute
