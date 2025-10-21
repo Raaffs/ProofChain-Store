@@ -26,11 +26,11 @@ func NewApp() *App {
 		log.Fatal("Failed to connect to MongoDB:", err)
 	}
 
-	db := client.Database("mydb") // Hardcoded DB name, remove env dependency
+	db := client.Database("ProofChain") 
 
 	return &App{
-		Documents:  mongorepo.NewDocumentMongoRepository(db.Collection("documents")),
-		Institutes: mongorepo.NewInstituteMongoRepository(db.Collection("institutes")),
+		Documents:  mongorepo.NewDocumentMongoRepository(db.Collection("Documents")),
+		Institutes: mongorepo.NewInstituteMongoRepository(db.Collection("institute")),
 	}
 }
 

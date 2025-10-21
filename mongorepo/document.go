@@ -1,14 +1,15 @@
 package mongorepo
 
 import (
-    "context"
-    "log"
-    "strings"
+	"context"
+	"fmt"
+	"log"
+	"strings"
 
-    "go.mongodb.org/mongo-driver/bson"
-    "go.mongodb.org/mongo-driver/mongo"
-    "github.com/Suy56/ProofChainStore/models"
-    "github.com/Suy56/ProofChainStore/repository"
+	"github.com/Suy56/ProofChainStore/models"
+	"github.com/Suy56/ProofChainStore/repository"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type DocumentMongoRepository struct {
@@ -41,5 +42,6 @@ func (r *DocumentMongoRepository) Retrieve(ctx context.Context, shahash string) 
         }
         return nil, err
     }
+    fmt.Println(result)
     return result, nil
 }
