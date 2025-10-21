@@ -7,16 +7,16 @@ import (
 )
 
 func main() {
-    a := app.NewApp()
+    app := app.NewApp()
 
     // Document routes
-    http.HandleFunc("POST /add", a.InsertDocumentHandler)
-    http.HandleFunc("POST /retrieve", a.RetrieveDocumentHandler)
+    http.HandleFunc("POST /add", app.InsertDocumentHandler)
+    http.HandleFunc("POST /retrieve", app.RetrieveDocumentHandler)
 
     // Institute routes
-    http.HandleFunc("POST /institute/insert", a.InsertInstituteHandler)
-    http.HandleFunc("GET /institute/retrieve", a.RetrieveInstituteHandler)
-    http.HandleFunc("POST /institute/addDocument", a.AddDocumentToInstituteHandler)
+    http.HandleFunc("POST /institute/insert", app.InsertInstituteHandler)
+    http.HandleFunc("GET /institute/retrieve", app.RetrieveInstituteHandler)
+    http.HandleFunc("POST /institute/addDocument", app.AddDocumentToInstituteHandler)
 
     log.Println("Server started on :8000")
     log.Fatal(http.ListenAndServe(":8000", nil))
