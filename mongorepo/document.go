@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Suy56/ProofChainStore/models"
-	"github.com/Suy56/ProofChainStore/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -16,7 +15,7 @@ type DocumentMongoRepository struct {
     collection *mongo.Collection
 }
 
-func NewDocumentMongoRepository(col *mongo.Collection) repository.DocumentRepository {
+func NewDocumentMongoRepository(col *mongo.Collection) models.DocumentRepository {
     return &DocumentMongoRepository{collection: col}
 }
 

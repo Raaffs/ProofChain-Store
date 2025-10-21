@@ -8,14 +8,13 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
     "github.com/Suy56/ProofChainStore/models"
-    "github.com/Suy56/ProofChainStore/repository"
 )
 
 type InstituteMongoRepository struct {
     collection *mongo.Collection
 }
 
-func NewInstituteMongoRepository(col *mongo.Collection) repository.InstituteRepository {
+func NewInstituteMongoRepository(col *mongo.Collection) models.InstituteRepository {
     return &InstituteMongoRepository{collection: col}
 }
 

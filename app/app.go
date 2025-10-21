@@ -8,15 +8,13 @@ import (
 
 	"github.com/Suy56/ProofChainStore/models"
 	"github.com/Suy56/ProofChainStore/mongorepo"
-	"github.com/Suy56/ProofChainStore/repository"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 // ----------------- App -----------------
 
 type App struct {
-	Documents  repository.DocumentRepository
-	Institutes repository.InstituteRepository
+	Model models.Models
 }
 
 // ----------------- NewApp -----------------
@@ -30,8 +28,10 @@ func NewApp() *App {
 	db := client.Database("ProofChain") 
 
 	return &App{
-		Documents:  mongorepo.NewDocumentMongoRepository(db.Collection("Documents")),
-		Institutes: mongorepo.NewInstituteMongoRepository(db.Collection("institute")),
+		Model: models.Models{
+			Documents:  mongorepo.NewDocumentMongoRepository(db.Collection("documents")),
+			Institutes: mongorepo.NewInstituteMongoRepository(db.Collection("institutes")),
+		},
 	}
 }
 
@@ -43,7 +43,7 @@ func (a *App) InsertDocumentHandler(w http.ResponseWriter, r *http.Request) {
 		WriteJson(w, http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 		return
 	}
-	if err := a.Documents.Insert(context.Background(), doc); err != nil {
+	if err := a.Model.Documents.Insert(context.Background(), doc); err != nil {
 		WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to insert document"})
 		return
 	}
@@ -82,7 +82,7 @@ func (app *App) RetrieveDocumentHandler(w http.ResponseWriter, r *http.Request) 
         return
     }
 
-    document, err := app.Documents.Retrieve(context.Background(), sha.Sha);if err!=nil{
+    document, err := app.Model.Documents.Retrieve(context.Background(), sha.Sha);if err!=nil{
 		log.Println("Error retrieving document:", err)
 		WriteJson(w, http.StatusInternalServerError, map[string]string{"Error": "Failed to retrieve document"})
 		return
@@ -119,7 +119,7 @@ func (app *App) InsertInstituteHandler(w http.ResponseWriter, r *http.Request) {
 		WriteJson(w, http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 		return
 	}
-	if err := app.Institutes.Insert(context.Background(), inst); err != nil {
+	if err := app.Model.Institutes.Insert(context.Background(), inst); err != nil {
 		WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to insert institute"})
 		return
 	}
@@ -134,7 +134,7 @@ func (a *App) RetrieveInstituteHandler(w http.ResponseWriter, r *http.Request) {
 		WriteJson(w, http.StatusBadRequest, map[string]string{"error": "Missing name"})
 		return
 	}
-	result, err := a.Institutes.RetrieveByName(context.Background(), payload.Name)
+	result, err := a.Model.Institutes.RetrieveByName(context.Background(), payload.Name)
 	if err != nil {
 		WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve institute"})
 		return
@@ -155,7 +155,7 @@ func (a *App) AddDocumentToInstituteHandler(w http.ResponseWriter, r *http.Reque
 		WriteJson(w, http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 		return
 	}
-	if err := a.Institutes.AddDocumentName(context.Background(), payload.Name, payload.DocumentName); err != nil {
+	if err := a.Model.Institutes.AddDocumentName(context.Background(), payload.Name, payload.DocumentName); err != nil {
 		WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to add document to institute"})
 		return
 	}
