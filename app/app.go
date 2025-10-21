@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Suy56/ProofChainStore/models"
 	"github.com/Suy56/ProofChainStore/mongorepo"
@@ -22,13 +23,20 @@ func NewApp() *App {
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB:", err)
 	}
+	dbName := os.Getenv("MONGO_DB")
+	documentCollection := os.Getenv("MONGO_COLLECTION_DOCUMENTS")
+	instituteCollection := os.Getenv("MONGO_COLLECTION_INSTITUTES")
 
-	db := client.Database("ProofChain") 
+	if dbName == "" || documentCollection == "" || instituteCollection == "" {
+		log.Fatal("Missing MongoDB environment variables.")
+	}
 
+	db := client.Database(dbName)
+	
 	return &App{
-		Model: models.Models{
-			Documents:  mongorepo.NewDocumentMongoRepository(db.Collection("documents")),
-			Institutes: mongorepo.NewInstituteMongoRepository(db.Collection("institutes")),
+		Model: models.Models{	
+			Documents:  mongorepo.NewDocumentMongoRepository(db.Collection(documentCollection)),
+			Institutes: mongorepo.NewInstituteMongoRepository(db.Collection(instituteCollection)),
 		},
 	}
 }
