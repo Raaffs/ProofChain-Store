@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -27,12 +27,10 @@ func connectToMongoDB() (*mongo.Client, error) {
 	serverApi:=options.ServerAPI(options.ServerAPIVersion1)
     clientOptions := options.Client().ApplyURI(uri).SetServerAPIOptions(serverApi)
     
-	fmt.Println("here")
     client, err := mongo.Connect(context.TODO(), clientOptions)
     if err != nil {
         return nil, err
     }
-	fmt.Println("here2")
     err = client.Ping(context.TODO(), nil)
     if err != nil {
         return nil, err
@@ -50,33 +48,51 @@ func main(){
 		Client: client,
 	}
 	app.Collection=app.Client.Database("ProofChain").Collection("Documents")
-	http.HandleFunc("GET /retrieve",app.RetrieveHandler)
+	log.Println("Collection selected:", app.Collection.Name())
+	http.HandleFunc("POST /retrieve",app.RetrieveHandler)
 	http.HandleFunc("POST /add",app.InsertHandler)
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8000", nil); err != nil {
 		log.Println("Error starting server:", err)
 	}
 }
 
 func (app *App) RetrieveHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("RetrieveHandler called")
     sha := struct {
         Sha string `json:"shahash"`
     }{}
-    
     err := json.NewDecoder(r.Body).Decode(&sha)
     if err != nil {
         log.Println("JSON decoding error:", err) // Log the error for debugging
         WriteJson(w, http.StatusBadRequest, map[string]string{"Error": "Invalid Json object"})
         return
     }
+    document, err := app.Retrieve(sha.Sha);if err!=nil{
+		log.Println("Error retrieving document:", err)
+		WriteJson(w, http.StatusInternalServerError, map[string]string{"Error": "Failed to retrieve document"})
+		return
+	}
 
-    document, err := app.Retrieve(sha.Sha)
-    if err != nil {
+	jsonDoc:=struct{
+		Shahash string `bson:"shahash" json:"shahash"`
+		EncryptedDocument []byte `bson:"encryptedDocument" json:"encryptedDocument"`
+		PublicAddress string `bson:"publicAddress" json:"publicAddress"`
+	}{}
+
+	marshalDoc,err:=bson.Marshal(document); if err!=nil{
 		log.Println("Error : ",err)
         WriteJson(w, http.StatusInternalServerError, map[string]string{"Error": "Internal server error"})
         return
-    }
+	}
+
+	if err:=bson.Unmarshal(marshalDoc,&jsonDoc);err!=nil{
+		log.Println("Error : ",err)
+        WriteJson(w, http.StatusInternalServerError, map[string]string{"Error": "Internal server error"})
+        return
+	}
+	log.Println("json doc:",jsonDoc.Shahash)
 	
-    WriteJson(w, http.StatusOK, map[string]any{"document": document})
+	WriteJson(w, http.StatusOK, jsonDoc)
 }
 
 func(app *App)InsertHandler(w http.ResponseWriter,r *http.Request){
@@ -92,6 +108,5 @@ func(app *App)InsertHandler(w http.ResponseWriter,r *http.Request){
 		WriteJson(w,http.StatusInternalServerError,map[string]string{"Error":"Internal server error"})
 		return
 	}
-	log.Println("document : ",document)
 	WriteJson(w,http.StatusOK,map[string]string{"Message":"Document inserted successfully"})
 }

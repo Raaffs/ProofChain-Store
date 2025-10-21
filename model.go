@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,7 +11,7 @@ import (
 
 type Document struct {
     Shahash           string `bson:"shahash" json:"shahash"`
-    EncryptedDocument string `bson:"encryptedDocument" json:"encryptedDocument"`
+    EncryptedDocument []byte `bson:"encryptedDocument" json:"encryptedDocument"`
     PublicAddress     string `bson:"publicAddress" json:"publicAddress"`
 }
 
@@ -23,19 +23,24 @@ func(app *App)Insert(document Document)error{
 	return nil
 }
 
-func(app *App)Retrieve(shahash string)(any,error){
-    var result any
-    fmt.Println("shahash string",shahash)
-	filter := bson.D{{Key: "shahash", Value: shahash}}
-	err := app.Collection.FindOne(context.TODO(), filter).Decode(&result)
+func (app *App) Retrieve(shahash string) (bson.M, error) {
+    var result bson.M // Use bson.M for structured output instead of `any`
+    
+    // Trim and sanitize input
+    shahash = strings.TrimSpace(shahash)
+    
+    filter := bson.D{{Key: "shahash", Value: shahash}}
+    log.Println("Query Filter:", filter)
+
+    // Query the collection
+    err := app.Collection.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
         if err == mongo.ErrNoDocuments {
-            log.Println("No document found with shahash:", result)
+            log.Println("No document found with shahash:", shahash)
             return nil, nil
         }
-        log.Println("internal server error:", result)
+        log.Println("Internal server error:", err)
         return nil, err
-    }
-    fmt.Println("document : ",result)
+    }    
     return result, nil
-}	
+}
