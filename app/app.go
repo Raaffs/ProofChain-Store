@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/Suy56/ProofChainStore/models"
-	"github.com/Suy56/ProofChainStore/mongorepo"
+	"github.com/Suy56/ProofChainStore/repository/mongorepo"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -52,7 +52,8 @@ func (a *App) InsertDocumentHandler(w http.ResponseWriter, r *http.Request) {
 		WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to insert document"})
 		return
 	}
-	WriteJson(w, http.StatusCreated, doc)
+	log.Println("inserted successfully")
+	WriteJson(w, http.StatusOK, doc)
 }
 
 // func (a *App) RetrieveDocumentHandler(w http.ResponseWriter, r *http.Request) {
